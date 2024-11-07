@@ -10,7 +10,6 @@ class Grid2D:
     def __init__(self, grid: np.ndarray) -> None:
         """ 2D grid"""
         self.grid: np.ndarray = grid
-        # self.feasable_edges = np.arange(1, grid.shape[1])
         self.xEdgeRange: np.ndarray = np.arange(0,grid.shape[0]+1, 1)
         self.yEdgeRange: np.ndarray = np.arange(0, grid.shape[1]+1, 1)
 
