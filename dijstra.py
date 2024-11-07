@@ -36,21 +36,22 @@ class Dikstras:
         self.queue_ = []
         heapq.heappush(self.queue_, (0, start_edge))
 
-        # self.directions_ = [(0,1), (0, -1), (1, 0), (-1, 0)] # FIXME: This should also go on diagonal
+        # Data saved for plotting
+        # self.current_edge: tuple[int, int]
+        # self.neighbour_edges: list[tuple[int,int]]
+        # self.active_neighbour_edge: tuple[int, int]
 
     def calcualte_pos_id(self, edge: tuple)->str:
         return str( edge[0] + edge[1] * self.dist_shape[1] )
 
-    def check_edge_feasiable(self, edge):
-        pass
-
     def iter(self) -> tuple[bool, list]:
 
         dist, edge = heapq.heappop(self.queue_)
+        self.current_edge = edge # Save data for plotting
         print(f"current edge {edge}, with dist {dist}")
 
         if edge == self.end_edge:
-            print("found path")
+            # print("found path")
             return True, self.reconstructShortestPath(edge)
 
         if dist > self.distances[edge]:
@@ -59,13 +60,15 @@ class Dikstras:
             return False, []
 
         next_edges = self.grid.get_neightbour_edges(edge)
+        self.neighbour_edges = next_edges
         print(f"next edges: {next_edges}")
         for ne in next_edges:
             if self.grid.edge_feaisable(ne):
                 ne_dist = dist + 1
-                print(f"next_edge {ne} was feasialbe with dist: {ne_dist}")
+                # print(f"next_edge {ne} was feasialbe with dist: {ne_dist}")
 
                 if ne_dist < self.distances[ne]:
+                    self.neighbour_edges.append(ne)
                     print(f"next edge {ne} was smaller than saved dist.\n {self.distances[ne]}")
                     self.distances[ne] = ne_dist
                     # Current edge becomes parent to next_edge
@@ -77,10 +80,10 @@ class Dikstras:
     def reconstructShortestPath(self, end_edge) -> list[tuple]:
         loop_edge = end_edge
         shortestPath = []
-        print(self.parents_)
+        # print(self.parents_)
         # print("Reversing thorugh parent tree to find the path")
         while loop_edge != (-1, -1):
-            print(f"{loop_edge}, ", end="")
+            # print(f"{loop_edge}, ", end="")
             # print(f"Appending edge {loop_edge}, with id: {self.calcualte_pos_id(loop_edge)}")
             shortestPath.append(loop_edge)
             # print(f"next loop_edge is {self.parents_[self.calcualte_pos_id(loop_edge)]} ")
@@ -89,16 +92,18 @@ class Dikstras:
         return shortestPath[::-1]
 
 
-
 if __name__ == '__main__':
     # pass
+    i = 0
     grid = Grid2D.get_test_grid()
-    algo = Dikstras(grid, (9,8), (14,15))
+    algo = Dikstras(grid, (9,8), (13,7))
     path_found = False
     while not path_found:
+        i += 1
         path_found, path = algo.iter()
     # print(path)
-    print(f"Distances: {algo.distances}")
+    # print(f"Distances: {algo.distances}")
+    print(i)
 
     fig, ax = plt.subplots()
     
