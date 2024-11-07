@@ -1,37 +1,35 @@
-
 from grid import Grid2D
 import heapq
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from typing import NamedTuple
 
-# class Graph:
-#
-#     def __init__(self, grid) -> None:
-#         self.grid = grid
-        
 
-# class Node:
-#     def __init__(self, pos=(None,None), dist=None) -> None:
-#         self.id = str(pos)
-#         self.pos = pos
-#         self.dist = dist
+class DijekstraIterData(NamedTuple):
+    current_edge: tuple[int, int]
+    current_queue: list[tuple[int, int]] = []
+    neighbour_edges: list[tuple[int, int]] = []
+    feasiable_edges: list[tuple[int, int]]  = []
+    unfeasable_edges: list[tuple[int, int]] = []
+    updated_edges: list[tuple[int,int]] = []
+    path: list[tuple[int, int]] = []
+    path_found: bool = False
 
 
 class Dikstras:
-
-    def __init__(self, grid: Grid2D, start_edge: tuple[int,int], end_edge: tuple[int,int]) -> None:
+    def __init__(
+        self, grid: Grid2D, start_edge: tuple[int, int], end_edge: tuple[int, int]
+    ) -> None:
         self.grid = grid
         self.start_edge = start_edge
         self.end_edge = end_edge
 
-        self.dist_shape = (grid.xEdgeRange.max()+1, grid.yEdgeRange.max()+1)
+        self.dist_shape = (grid.xEdgeRange.max() + 1, grid.yEdgeRange.max() + 1)
         self.distances = np.full(self.dist_shape, np.inf)
         self.distances[start_edge] = 0
 
-        self.parents_ = {
-            self.calcualte_pos_id(start_edge): (-1,-1)
-        }
+        self.parents_ = {self.calcualte_pos_id(start_edge): (-1, -1)}
 
         self.queue_ = []
         heapq.heappush(self.queue_, (0, start_edge))
@@ -41,41 +39,57 @@ class Dikstras:
         # self.neighbour_edges: list[tuple[int,int]]
         # self.active_neighbour_edge: tuple[int, int]
 
-    def calcualte_pos_id(self, edge: tuple)->str:
-        return str( edge[0] + edge[1] * self.dist_shape[1] )
+    def calcualte_pos_id(self, edge: tuple) -> str:
+        return str(edge[0] + edge[1] * self.dist_shape[1])
 
-    def iter(self) -> tuple[bool, list]:
-
+    def iter(self) -> DijekstraIterData:
         dist, edge = heapq.heappop(self.queue_)
-        self.current_edge = edge # Save data for plotting
-        print(f"current edge {edge}, with dist {dist}")
+        # self.current_edge = edge  # Save data for plotting
+        # print(f"current edge {edge}, with dist {dist}")
 
         if edge == self.end_edge:
             # print("found path")
-            return True, self.reconstructShortestPath(edge)
+            path = self.reconstructShortestPath(edge)
+            return DijekstraIterData(current_edge=edge, path=path, path_found=True)
 
         if dist > self.distances[edge]:
             # FIXME: can we return here?
             print("Early return")
-            return False, []
+            return DijekstraIterData(current_edge=edge)
+
+        feasiable_edges = []
+        unfeasable_edges = []
+        updated_edges = []
 
         next_edges = self.grid.get_neightbour_edges(edge)
-        self.neighbour_edges = next_edges
-        print(f"next edges: {next_edges}")
+        # print(f"next edges: {next_edges}")
         for ne in next_edges:
             if self.grid.edge_feaisable(ne):
                 ne_dist = dist + 1
                 # print(f"next_edge {ne} was feasialbe with dist: {ne_dist}")
-
+                feasiable_edges.append(ne)
                 if ne_dist < self.distances[ne]:
-                    self.neighbour_edges.append(ne)
-                    print(f"next edge {ne} was smaller than saved dist.\n {self.distances[ne]}")
+                    updated_edges.append(ne)
+                    # print(
+                    #     f"next edge {ne} was smaller than saved dist.\n {self.distances[ne]}"
+                    # )
                     self.distances[ne] = ne_dist
                     # Current edge becomes parent to next_edge
                     self.parents_[self.calcualte_pos_id(ne)] = edge
+                    if (ne_dist, ne) in self.queue_:
+                        print(f"We doubled added {ne} to the queue")
                     heapq.heappush(self.queue_, (ne_dist, ne))
+            else:
+                unfeasable_edges.append(ne)
 
-        return False, []
+        return DijekstraIterData(
+            current_edge=edge,
+            current_queue=[q[1] for q in self.queue_],
+            neighbour_edges=next_edges,
+            feasiable_edges=feasiable_edges,
+            updated_edges=updated_edges,
+            unfeasable_edges=unfeasable_edges
+        )
 
     def reconstructShortestPath(self, end_edge) -> list[tuple]:
         loop_edge = end_edge
@@ -92,27 +106,26 @@ class Dikstras:
         return shortestPath[::-1]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # pass
     i = 0
     grid = Grid2D.get_test_grid()
-    algo = Dikstras(grid, (9,8), (13,7))
+    algo = Dikstras(grid, (2, 2), (13, 7))
     path_found = False
     while not path_found:
         i += 1
-        path_found, path = algo.iter()
+        data = algo.iter()
+        # print(data)
+        path_found = data.path_found
     # print(path)
     # print(f"Distances: {algo.distances}")
-    print(i)
+    # print(i)
 
     fig, ax = plt.subplots()
-    
-    x = [e[0] for e in path]
-    y = [e[1] for e in path]
+
+    x = [e[0] for e in data.path]
+    y = [e[1] for e in data.path]
     algo.grid.plot_grid(ax)
     ax.scatter(x, y, zorder=2)
-    ax.plot(x,y)
+    ax.plot(x, y)
     plt.show()
-    
-
-
