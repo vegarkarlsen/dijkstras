@@ -29,7 +29,8 @@ class Dikstras:
         self.distances = np.full(self.dist_shape, np.inf)
         self.distances[start_edge] = 0
 
-        self.parents_ = {self.calcualte_pos_id(start_edge): (-1, -1)}
+        # self.parents_ = {self.calcualte_pos_id(start_edge): (-1, -1)}
+        self.parents_ = {start_edge: (-1, -1)}
 
         self.queue_ = []
         heapq.heappush(self.queue_, (0, start_edge))
@@ -39,16 +40,13 @@ class Dikstras:
         # self.neighbour_edges: list[tuple[int,int]]
         # self.active_neighbour_edge: tuple[int, int]
 
-    def calcualte_pos_id(self, edge: tuple) -> str:
-        return str(edge[0] + edge[1] * self.dist_shape[1])
-
     def iter(self) -> DijekstraIterData:
         dist, edge = heapq.heappop(self.queue_)
         # self.current_edge = edge  # Save data for plotting
         # print(f"current edge {edge}, with dist {dist}")
 
         if edge == self.end_edge:
-            # print("found path")
+            print("found destenation, reconstructing path")
             path = self.reconstructShortestPath(edge)
             return DijekstraIterData(current_edge=edge, path=path, path_found=True)
 
@@ -62,7 +60,7 @@ class Dikstras:
         updated_edges = []
 
         next_edges = self.grid.get_neightbour_edges(edge)
-        # print(f"next edges: {next_edges}")
+        # print(f"current edge: {edge} next edges: {next_edges}")
         for ne in next_edges:
             if self.grid.edge_feaisable(ne):
                 ne_dist = dist + 1
@@ -75,7 +73,11 @@ class Dikstras:
                     # )
                     self.distances[ne] = ne_dist
                     # Current edge becomes parent to next_edge
-                    self.parents_[self.calcualte_pos_id(ne)] = edge
+                    print(f"edge {edge}, becomes parent to {ne}")
+                    # self.parents_[self.calcualte_pos_id(ne)] = edge
+                    self.parents_[ne] = edge
+                    # if self.calcualte_pos_id(ne) in list(self.parents_.keys()):
+                    #     print(f"{ne} is allready in parents.")
                     if (ne_dist, ne) in self.queue_:
                         print(f"We doubled added {ne} to the queue")
                     heapq.heappush(self.queue_, (ne_dist, ne))
@@ -98,11 +100,12 @@ class Dikstras:
         # print("Reversing thorugh parent tree to find the path")
         while loop_edge != (-1, -1):
             # print(f"{loop_edge}, ", end="")
-            # print(f"Appending edge {loop_edge}, with id: {self.calcualte_pos_id(loop_edge)}")
+            # print(f"Appending edge {loop_edge}, with id: {loop_edge}")
             shortestPath.append(loop_edge)
             # print(f"next loop_edge is {self.parents_[self.calcualte_pos_id(loop_edge)]} ")
-            loop_edge = self.parents_[self.calcualte_pos_id(loop_edge)]
+            loop_edge = self.parents_[loop_edge]
             # time.sleep(1)
+        # print(f"Path created.")
         return shortestPath[::-1]
 
 
