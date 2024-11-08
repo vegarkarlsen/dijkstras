@@ -5,12 +5,17 @@ import numpy as np
 
 from grid import Grid2D
 from dijstra import DijekstraIterData, Dikstras
+from parking_lot_grid import parking_lot
+fig, ax = plt.subplots(figsize=(16,9))
 
+# grid = Grid2D.get_test_grid()
 
-fig, ax = plt.subplots()
+# grid[10,15:20] = 1
+# grid[20:30, 10:15] = 1
+# g = Grid2D.get_test_grid()
+g = Grid2D(grid=parking_lot[::-1])
 
-grid = Grid2D.get_test_grid()
-algo = Dikstras(grid, (9, 8), (13, 7))
+algo = Dikstras(g, (3, 1), (28, 22))
 algo.grid.plot_grid(ax)
 
 
@@ -104,7 +109,7 @@ def animate_update(frame):
 
     # NOTE: Frame does not behave correclty in the start?
     if frame < 3:
-        print(frame)
+        # print(frame)
         return ArtistManager.empty,
 
     # Default artists to draw
@@ -123,7 +128,6 @@ def animate_update(frame):
 
 
     inside_iteration = frame % frame_iterations
-    # print(f"i: {inside_iteration}")
     match inside_iteration:
         case 0:
             data = algo.iter()
@@ -132,9 +136,7 @@ def animate_update(frame):
         case 1:
             active_artists.extend(
                 [
-                    # ArtistManager.active_edge_scat,
                     ArtistManager.updated_edges_scat,
-                    # ArtistManager.unfeasable_edges_scat,
                 ]
             )
             ArtistManager.update_queue()
@@ -143,5 +145,7 @@ def animate_update(frame):
 
 
 frames = algo.grid.xEdgeRange.max() * algo.grid.yEdgeRange.max() * frame_iterations
-ani = FuncAnimation(fig, animate_update, frames=frames, interval=10, blit=True)
+print(f"There are {frames} frames.")
+ani = FuncAnimation(fig, animate_update, frames=frames, interval=1, blit=True)
+# ani.save("animation.mp4", writer="ffmpeg", fps=30, dpi=200)
 plt.show()
