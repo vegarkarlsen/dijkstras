@@ -4,7 +4,10 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from numpy._core.defchararray import lstrip
 import matplotlib.cm
-# from abc import ABC, abstractmethod
+
+import glob
+
+
 
 
 class Grid2D:
@@ -22,6 +25,11 @@ class Grid2D:
         # grid[0,:] = 1
         # grid[1,3] = 1
         return cls(grid)
+
+    @classmethod
+    def load_from_file(cls, filename) -> "Grid2D":
+        g = np.load(filename)
+        return cls(g)
 
     def set_cell(self, cell: tuple[int, int], value: int = 1):
         """Sets a cell in the grid to value.
