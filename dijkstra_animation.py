@@ -4,8 +4,8 @@ from matplotlib.animation import ArtistAnimation, FuncAnimation
 import numpy as np
 
 from grid import Grid2D
-from dijstra import DijekstraIterData, Dikstras
-from parking_lot_grid import parking_lot
+from dijkstra import DijekstraIterData, Dikstras
+# from parking_lot_grid import parking_lot
 fig, ax = plt.subplots(figsize=(16,9))
 
 # grid = Grid2D.get_test_grid()
@@ -13,10 +13,13 @@ fig, ax = plt.subplots(figsize=(16,9))
 # grid[10,15:20] = 1
 # grid[20:30, 10:15] = 1
 # g = Grid2D.get_test_grid()
-g = Grid2D(grid=parking_lot[::-1])
+parking_lot_grid_file = np.load("numpy_grids/parking_lot_grid_20_30.npy")
+g = Grid2D(grid=parking_lot_grid_file)
 
-algo = Dikstras(g, (3, 1), (28, 22))
-algo.grid.plot_grid(ax)
+algo = Dikstras(g, (1, 3), (27, 19))
+
+algo.grid.set_up_axis(ax)
+mesh = algo.grid.get_grid_mesh(ax)
 
 
 class ArtistManager:
@@ -146,6 +149,6 @@ def animate_update(frame):
 
 frames = algo.grid.xEdgeRange.max() * algo.grid.yEdgeRange.max() * frame_iterations
 print(f"There are {frames} frames.")
-ani = FuncAnimation(fig, animate_update, frames=frames, interval=1, blit=True)
+ani = FuncAnimation(fig, animate_update, frames=frames, interval=10, blit=True)
 # ani.save("animation.mp4", writer="ffmpeg", fps=30, dpi=200)
 plt.show()
