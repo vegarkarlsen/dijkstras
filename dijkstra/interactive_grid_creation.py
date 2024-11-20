@@ -1,12 +1,14 @@
-import numpy as np
-from grid import Grid2D
-import matplotlib.pyplot as plt
+import os
+import re
+
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import numpy as np
 
 # from matplotlib.animation import ArtistAnimation
 from matplotlib.animation import FuncAnimation
-import re
-import os
+
+from dijkstra.grid import Grid2D
 
 
 def choose_grid_file() -> tuple[np.ndarray, str]:

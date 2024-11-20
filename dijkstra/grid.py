@@ -1,13 +1,10 @@
-from matplotlib.collections import QuadMesh
+import glob
+
+import matplotlib.cm
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
-from numpy._core.defchararray import lstrip
-import matplotlib.cm
-
-import glob
-
-
+from matplotlib.collections import QuadMesh
 
 
 class Grid2D:

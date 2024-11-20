@@ -1,9 +1,11 @@
-from grid import Grid2D
 import heapq
-import numpy as np
 import time
-import matplotlib.pyplot as plt
 from typing import NamedTuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from dijkstra.grid import Grid2D
 
 
 class DijekstraIterData(NamedTuple):
@@ -17,7 +19,7 @@ class DijekstraIterData(NamedTuple):
     path_found: bool = False
 
 
-class Dikstras:
+class Dijkstras:
     def __init__(
         self, grid: Grid2D, start_edge: tuple[int, int], end_edge: tuple[int, int]
     ) -> None:
@@ -113,7 +115,7 @@ if __name__ == "__main__":
     # pass
     i = 0
     grid = Grid2D.get_test_grid()
-    algo = Dikstras(grid, (2, 2), (13, 7))
+    algo = Dijkstras(grid, (2, 2), (13, 7))
     path_found = False
     while not path_found:
         i += 1
