@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from animations.draw import DrawBoard
 from dijkstra.dijkstra import DijekstraIterData, Dijkstras
 from dijkstra.grid import Grid2D
 from matplotlib.animation import ArtistAnimation, FuncAnimation
@@ -7,100 +8,86 @@ from matplotlib.collections import PathCollection
 from .colors import colors
 from matplotlib.axes import Axes
 
-# from parking_lot_grid import parking_lot
-fig, ax = plt.subplots(figsize=(16,9))
-# fig.set_facecolor(colors['bg_dark'])
-# ax.set_facecolor(colors['bg'])
-fig.tight_layout()
-
-# grid = Grid2D.get_test_grid()
-
-# grid[10,15:20] = 1
-# grid[20:30, 10:15] = 1
-# g = Grid2D.get_test_grid()
-parking_lot_grid_file = np.load("numpy_grids/parking_lot_grid_22_28.npy")
-g = Grid2D(grid=parking_lot_grid_file)
-
-algo = Dijkstras(g, (1, 3), (27, 21))
-
-algo.grid.set_up_axis(ax)
-mesh = algo.grid.get_grid_mesh(ax)
-
 class ArtistManager:
-    active_edge_scat = ax.scatter([], [], color="red", zorder=3, linewidths=3)
-    discovered_edges_scat = ax.scatter([], [], color="grey", zorder=2, linewidths=2)
 
-    neighbour_scat = ax.scatter([], [], color="green", zorder=2)
-    feasiable_edges_scat = ax.scatter([], [], color="green", zorder=2)
-    unfeasable_edges_scat = ax.scatter([], [], color="black", zorder=2)
-    updated_edges_scat = ax.scatter([], [], color="green",zorder=2, linewidths=2)
+    def __init__(self, fig, ax) -> None:
+        self.fig = fig
+        self.ax  = ax
+    
+        self.active_edge_scat = ax.scatter([], [], color="red", zorder=3, linewidths=3)
+        self.discovered_edges_scat = ax.scatter([], [], color="grey", zorder=2, linewidths=2)
 
-    queue_scat = ax.scatter([], [], facecolor="none", edgecolors="blue", zorder=1, linewidths=1)
+        self.neighbour_scat = ax.scatter([], [], color="green", zorder=2)
+        self.feasiable_edges_scat = ax.scatter([], [], color="green", zorder=2)
+        self.unfeasable_edges_scat = ax.scatter([], [], color="black", zorder=2)
+        self.updated_edges_scat = ax.scatter([], [], color="green",zorder=2, linewidths=2)
 
-    empty = ax.scatter([], [])
+        self.queue_scat = ax.scatter([], [], facecolor="none", edgecolors="blue", zorder=1, linewidths=1)
 
-    final_path, = ax.plot([], [], color="green", linewidth=3, zorder=4)
-    exploration_graph = []
+        self.empty = ax.scatter([], [])
 
-    discovered_edges = []
-    unfeasable_edges = []
-    new_queue = []
+        self.final_path, = ax.plot([], [], color="green", linewidth=3, zorder=4)
+        self.exploration_graph = []
 
-    @classmethod
-    def construct_final_graph(cls, path):
+        self.discovered_edges = []
+        self.unfeasable_edges = []
+        self.new_queue = []
+
+    
+    def construct_final_graph(self, path):
         if len(path) > 0:
             x = [p[0] for p in path]
             y = [p[1] for p in path]
             
-            cls.final_path.set_data(x,y)
+            self.final_path.set_data(x,y)
 
-    @classmethod
-    def update_scat(cls, artists: PathCollection, data):
+    
+    def update_scat(self, artists: PathCollection, data):
         if len(data):
             artists.set_offsets(data)
             artists.set_visible(True)
             return
         artists.set_visible(False)
 
-    @classmethod
-    def update_artists(cls, data: DijekstraIterData):
+    
+    def update_artists(self, data: DijekstraIterData):
         # Update saved data
-        cls.unfeasable_edges.extend(data.unfeasable_edges)
-        cls.new_queue = data.current_queue
+        self.unfeasable_edges.extend(data.unfeasable_edges)
+        self.new_queue = data.current_queue
 
-        cls.active_edge_scat.set_offsets(data.current_edge)
+        self.active_edge_scat.set_offsets(data.current_edge)
 
-        cls.update_scat(cls.discovered_edges_scat, cls.discovered_edges)
+        self.update_scat(self.discovered_edges_scat, self.discovered_edges)
 
-        cls.update_scat(cls.neighbour_scat, data.neighbour_edges)
-        cls.update_scat(cls.feasiable_edges_scat, data.feasiable_edges)
+        self.update_scat(self.neighbour_scat, data.neighbour_edges)
+        self.update_scat(self.feasiable_edges_scat, data.feasiable_edges)
 
-        cls.update_scat(cls.unfeasable_edges_scat, cls.unfeasable_edges)
+        self.update_scat(self.unfeasable_edges_scat, self.unfeasable_edges)
 
-        cls.update_scat(cls.updated_edges_scat, data.updated_edges)
+        self.update_scat(self.updated_edges_scat, data.updated_edges)
     
-        # cls.update_scat(cls.queue_scat, cls.new_queue)
-        # cls.new_queue = data.current_queue
-        cls.discovered_edges.append(data.current_edge)
+        # self.update_scat(self.queue_scat, self.new_queue)
+        # self.new_queue = data.current_queue
+        self.discovered_edges.append(data.current_edge)
 
-        lines = cls.make_graph(data.current_edge, data.updated_edges)
-        cls.exploration_graph.extend(lines)
+        lines = self.make_graph(data.current_edge, data.updated_edges)
+        self.exploration_graph.extend(lines)
 
-        cls.construct_final_graph(data.path)
+        self.construct_final_graph(data.path)
 
-    @classmethod
-    def update_queue(cls):
-        cls.update_scat(cls.queue_scat, cls.new_queue)
-        # cls.new_queue
     
-    @classmethod
-    def make_graph(cls, current_edge: tuple[int,int], updated_edges: list[tuple[int,int]]) -> list[list]:
+    def update_queue(self):
+        self.update_scat(self.queue_scat, self.new_queue)
+        # self.new_queue
+    
+    
+    def make_graph(self, current_edge: tuple[int,int], updated_edges: list[tuple[int,int]]) -> list[list]:
 
         lines = []
         for e in updated_edges:
             x = [current_edge[0], e[0]]
             y = [current_edge[1], e[1]]
-            line, = ax.plot(x,y, color="grey", zorder=1)
+            line, = self.ax.plot(x,y, color="grey", zorder=1)
             lines.append(line)
         return lines
 
@@ -110,27 +97,27 @@ path_found = False
 frame_iterations = 2
 final_path = []
 
-def animate_update(frame):
+def animate_update(frame, artist_manager):
     global frame_iterations
     global path_found
 
     # NOTE: Frame does not behave correclty in the start?
     if frame < 3:
         # print(frame)
-        return ArtistManager.empty,
+        return artist_manager.empty,
 
     # Default artists to draw
     active_artists = [
-        ArtistManager.active_edge_scat,
-        ArtistManager.unfeasable_edges_scat,
-        ArtistManager.discovered_edges_scat,
-        ArtistManager.queue_scat,
-        # *ArtistManager.exploration_graph
+        artist_manager.active_edge_scat,
+        artist_manager.unfeasable_edges_scat,
+        artist_manager.discovered_edges_scat,
+        artist_manager.queue_scat,
+        # *artist_manager.exploration_graph
     ]
-    active_artists.extend(ArtistManager.exploration_graph)
+    active_artists.extend(artist_manager.exploration_graph)
 
     if path_found:
-        active_artists.append(ArtistManager.final_path)
+        active_artists.append(artist_manager.final_path)
         return active_artists
 
 
@@ -138,21 +125,35 @@ def animate_update(frame):
     match inside_iteration:
         case 0:
             data = algo.iter()
-            ArtistManager.update_artists(data)
+            artist_manager.update_artists(data)
             path_found = data.path_found
         case 1:
             active_artists.extend(
                 [
-                    ArtistManager.updated_edges_scat,
+                    artist_manager.updated_edges_scat,
                 ]
             )
-            ArtistManager.update_queue()
+            artist_manager.update_queue()
 
     return active_artists
 
 if __name__ == "__main__":
+    # Set up drawBoard
+    db = DrawBoard()
+    # db.show_spines(False)
+    db.show_ticks(False)
+
+    # Set up Scenario
+    parking_lot_grid_file = np.load("numpy_grids/parking_lot_grid_22_28.npy")
+    g = Grid2D(grid=parking_lot_grid_file)
+    algo = Dijkstras(g, (1, 3), (27, 21))
+
+    algo.grid.set_up_axis(db.ax)
+    mesh = algo.grid.get_grid_mesh(db.ax)
+    artist_manager = ArtistManager(db.fig, db.ax)
+    
     frames = algo.grid.xEdgeRange.max() * algo.grid.yEdgeRange.max() * frame_iterations
     print(f"There are {frames} frames.")
-    ani = FuncAnimation(fig, animate_update, frames=frames, interval=10, blit=True)
+    ani = FuncAnimation(db.fig, animate_update, frames=frames, interval=10, blit=True, fargs=(artist_manager,))
     # ani.save("animation.mp4", writer="ffmpeg", fps=30, dpi=200)
     plt.show()
