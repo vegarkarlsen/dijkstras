@@ -1,26 +1,30 @@
-from matplotlib.collections import PathCollection
 import matplotlib.pyplot as plt
-from matplotlib.animation import ArtistAnimation, FuncAnimation
 import numpy as np
+from dijkstra.dijkstra import DijekstraIterData, Dijkstras
+from dijkstra.grid import Grid2D
+from matplotlib.animation import ArtistAnimation, FuncAnimation
+from matplotlib.collections import PathCollection
+from .colors import colors
+from matplotlib.axes import Axes
 
-from grid import Grid2D
-from dijkstra import DijekstraIterData, Dikstras
 # from parking_lot_grid import parking_lot
 fig, ax = plt.subplots(figsize=(16,9))
+# fig.set_facecolor(colors['bg_dark'])
+# ax.set_facecolor(colors['bg'])
+fig.tight_layout()
 
 # grid = Grid2D.get_test_grid()
 
 # grid[10,15:20] = 1
 # grid[20:30, 10:15] = 1
 # g = Grid2D.get_test_grid()
-parking_lot_grid_file = np.load("numpy_grids/parking_lot_grid_20_30.npy")
+parking_lot_grid_file = np.load("numpy_grids/parking_lot_grid_22_28.npy")
 g = Grid2D(grid=parking_lot_grid_file)
 
-algo = Dikstras(g, (1, 3), (27, 19))
+algo = Dijkstras(g, (1, 3), (27, 21))
 
 algo.grid.set_up_axis(ax)
 mesh = algo.grid.get_grid_mesh(ax)
-
 
 class ArtistManager:
     active_edge_scat = ax.scatter([], [], color="red", zorder=3, linewidths=3)
@@ -146,9 +150,9 @@ def animate_update(frame):
 
     return active_artists
 
-
-frames = algo.grid.xEdgeRange.max() * algo.grid.yEdgeRange.max() * frame_iterations
-print(f"There are {frames} frames.")
-ani = FuncAnimation(fig, animate_update, frames=frames, interval=10, blit=True)
-# ani.save("animation.mp4", writer="ffmpeg", fps=30, dpi=200)
-plt.show()
+if __name__ == "__main__":
+    frames = algo.grid.xEdgeRange.max() * algo.grid.yEdgeRange.max() * frame_iterations
+    print(f"There are {frames} frames.")
+    ani = FuncAnimation(fig, animate_update, frames=frames, interval=10, blit=True)
+    # ani.save("animation.mp4", writer="ffmpeg", fps=30, dpi=200)
+    plt.show()
