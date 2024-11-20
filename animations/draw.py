@@ -7,11 +7,11 @@ from dijkstra.grid import Grid2D
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
-frames_storage = PROJECT_ROOT.joinpath("frames")
+FRAMES_STORAGE = PROJECT_ROOT.joinpath("frames")
 
 class DrawBoard:
 
-    def __init__(self) -> None:
+    def __init__(self, frames_storage=FRAMES_STORAGE) -> None:
         matplotlib.rcParams["toolbar"] = "none"
         self.fig, self.ax = plt.subplots(figsize=(16,9))
         self.fig.tight_layout()

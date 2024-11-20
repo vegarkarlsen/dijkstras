@@ -23,18 +23,18 @@ parking_lot_image = mpimg.imread(
 numpy_file = PROJECT_ROOT.joinpath("numpy_grids/add_cells_22_28.npy")
 numpy_file_full_grid = PROJECT_ROOT.joinpath("numpy_grids/parking_lot_grid_22_28.npy")
 
-frames_storage = PROJECT_ROOT.joinpath("frames")
+FRAMES_STORAGE = PROJECT_ROOT.joinpath("frames/part1")
 
 
 def clean_frames_storage():
-    if os.path.isdir(frames_storage):
+    if os.path.isdir(FRAMES_STORAGE):
         print("Removing Old storage")
-        shutil.rmtree(frames_storage)
+        shutil.rmtree(FRAMES_STORAGE)
 
-    os.mkdir(frames_storage)  # recreate the storage.
+    os.mkdir(FRAMES_STORAGE)  # recreate the storage.
 
 
-db = DrawBoard()
+db = DrawBoard(frames_storage=FRAMES_STORAGE)
 db.show_spines(False)
 db.show_ticks(False)
 
