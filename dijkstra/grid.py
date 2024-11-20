@@ -115,10 +115,10 @@ class Grid2D:
                 return False
         return True
 
-    def set_up_axis(self, ax: Axes ):
+    def set_up_axis(self, ax: Axes):
         ax.set_xticks(self.xEdgeRange)
         ax.set_yticks(self.yEdgeRange)
-        ax.grid(True, zorder=2)
+        ax.grid(True, zorder=2, color="black")
         # ax.set_xticklabels("")
         # ax.set_yticklabels("")
 
