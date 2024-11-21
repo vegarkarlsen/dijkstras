@@ -26,14 +26,6 @@ numpy_file_full_grid = PROJECT_ROOT.joinpath("numpy_grids/parking_lot_grid_22_28
 FRAMES_STORAGE = PROJECT_ROOT.joinpath("frames/part1")
 
 
-def clean_frames_storage():
-    if os.path.isdir(FRAMES_STORAGE):
-        print("Removing Old storage")
-        shutil.rmtree(FRAMES_STORAGE)
-
-    os.mkdir(FRAMES_STORAGE)  # recreate the storage.
-
-
 db = DrawBoard(frames_storage=FRAMES_STORAGE)
 db.show_spines(False)
 db.show_ticks(False)
@@ -148,6 +140,7 @@ def transition_to_dijkstra_lecture():
         grid_mesh = full_grid.get_grid_mesh(db.ax)
 
 
+    # NOTE: zoom_factor needs to match movie_part_2
     frames = 60
     zoom_factor = 13
     step_decrese = zoom_factor/frames
@@ -172,7 +165,7 @@ def transition_to_dijkstra_lecture():
     db.save_animation(ani, "grid_zoom.mp4")
     return ani
 
-clean_frames_storage()
+db.reset_frames_storage()
 make_intro()
 add_map()
 add_start_and_end_pos()
