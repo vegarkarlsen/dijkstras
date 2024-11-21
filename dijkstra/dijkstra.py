@@ -35,7 +35,8 @@ class Dijkstras:
         self.parents_ = {start_edge: (-1, -1)}
 
         self.queue_ = []
-        heapq.heappush(self.queue_, (0, start_edge))
+        # heapq.heappush(self.queue_, (0, start_edge))
+        self.queue_.append((0, start_edge))
 
         # Data saved for plotting
         # self.current_edge: tuple[int, int]
@@ -43,7 +44,8 @@ class Dijkstras:
         # self.active_neighbour_edge: tuple[int, int]
 
     def iter(self) -> DijekstraIterData:
-        dist, edge = heapq.heappop(self.queue_)
+        # dist, edge = heapq.heappop(self.queue_)
+        dist, edge = self.queue_.pop(0)
         # self.current_edge = edge  # Save data for plotting
         # print(f"current edge {edge}, with dist {dist}")
 
@@ -61,9 +63,11 @@ class Dijkstras:
         unfeasable_edges = []
         updated_edges = []
 
+        # TODO: Consider adding distances asweell to account for non 1*1 grid
         next_edges = self.grid.get_neightbour_edges(edge)
         # print(f"current edge: {edge} next edges: {next_edges}")
         for ne in next_edges:
+            # print(ne)
             if self.grid.edge_feaisable(ne):
                 ne_dist = dist + 1
                 # print(f"next_edge {ne} was feasialbe with dist: {ne_dist}")
@@ -75,14 +79,15 @@ class Dijkstras:
                     # )
                     self.distances[ne] = ne_dist
                     # Current edge becomes parent to next_edge
-                    print(f"edge {edge}, becomes parent to {ne}")
+                    # print(f"edge {edge}, becomes parent to {ne}")
                     # self.parents_[self.calcualte_pos_id(ne)] = edge
                     self.parents_[ne] = edge
                     # if self.calcualte_pos_id(ne) in list(self.parents_.keys()):
                     #     print(f"{ne} is allready in parents.")
                     if (ne_dist, ne) in self.queue_:
                         print(f"We doubled added {ne} to the queue")
-                    heapq.heappush(self.queue_, (ne_dist, ne))
+                    # heapq.heappush(self.queue_, (ne_dist, ne))
+                    self.queue_.append((ne_dist, ne))
             else:
                 unfeasable_edges.append(ne)
 
