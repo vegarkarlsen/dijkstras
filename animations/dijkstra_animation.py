@@ -14,18 +14,19 @@ class ArtistManager:
         self.fig = fig
         self.ax  = ax
     
-        self.active_edge_scat = ax.scatter([], [], color="red", zorder=3, linewidths=3)
-        self.discovered_edges_scat = ax.scatter([], [], color="grey", zorder=2, linewidths=2)
+        self.active_edge_scat = ax.scatter([], [], color="red", zorder=3, linewidths=3, visible=False)
+        self.discovered_edges_scat = ax.scatter([], [], color="grey", zorder=2, linewidths=2, visible=False)
 
-        self.neighbour_scat = ax.scatter([], [], color="green", zorder=2)
-        self.feasiable_edges_scat = ax.scatter([], [], color="green", zorder=2)
-        self.unfeasable_edges_scat = ax.scatter([], [], color="black", zorder=2)
-        self.updated_edges_scat = ax.scatter([], [], color="green",zorder=2, linewidths=2)
+        self.neighbour_scat = ax.scatter([], [], color="green", zorder=2, visible=False)
+        self.feasiable_edges_scat = ax.scatter([], [], color="green", zorder=2, visible=False)
+        self.unfeasable_edges_scat = ax.scatter([], [], color="grey", zorder=2, visible=False)
+        self.updated_edges_scat = ax.scatter([], [], color="green",zorder=2, linewidths=2, visible=False)
 
-        self.queue_scat = ax.scatter([], [], facecolor="none", edgecolors="blue", zorder=1, linewidths=1)
+        self.queue_scat = ax.scatter([], [], facecolor="none", edgecolors="blue", zorder=1, linewidths=1, visible=False)
 
-        self.empty = ax.scatter([], [])
+        self.empty = ax.scatter([], [], visible=False)
 
+        # self.final_path, = ax.plot([], [], color="green", linewidth=3, zorder=4, visible=False)
         self.final_path, = ax.plot([], [], color="green", linewidth=3, zorder=4)
         self.exploration_graph = []
 
@@ -42,12 +43,15 @@ class ArtistManager:
             self.final_path.set_data(x,y)
 
     
-    def update_scat(self, artists: PathCollection, data):
+    def update_scat(self, artist: PathCollection, data: list[tuple]):
+        # print(f"[update_scat] data: {data}, type: {type(data)}")
+        # no new data
         if len(data):
-            artists.set_offsets(data)
-            artists.set_visible(True)
+            artist.set_offsets(data)
+            # artists.set_visible(True)
             return
-        artists.set_visible(False)
+        # artists.set_visible(False)
+        artist.set_offsets([100,100]) # Move out of screen (since we cannot set to empty)
 
     
     def update_artists(self, data: DijekstraIterData):
@@ -56,6 +60,7 @@ class ArtistManager:
         self.new_queue = data.current_queue
 
         self.active_edge_scat.set_offsets(data.current_edge)
+        # print(f"[ Update Artists ] active edge {data.current_edge}: type: {type(data.current_edge)}")
 
         self.update_scat(self.discovered_edges_scat, self.discovered_edges)
 
@@ -80,14 +85,13 @@ class ArtistManager:
         self.update_scat(self.queue_scat, self.new_queue)
         # self.new_queue
     
-    
     def make_graph(self, current_edge: tuple[int,int], updated_edges: list[tuple[int,int]]) -> list[list]:
 
         lines = []
         for e in updated_edges:
             x = [current_edge[0], e[0]]
             y = [current_edge[1], e[1]]
-            line, = self.ax.plot(x,y, color="grey", zorder=1)
+            line, = self.ax.plot(x,y, color="grey", zorder=1, visible=False)
             lines.append(line)
         return lines
 
@@ -135,11 +139,14 @@ def animate_update(frame, artist_manager):
             )
             artist_manager.update_queue()
 
+    for artist in active_artists:
+        artist.set_visible(True)
+
     return active_artists
 
 if __name__ == "__main__":
     # Set up drawBoard
-    db = DrawBoard()
+    db = DrawBoard(frames_storage=None)
     # db.show_spines(False)
     db.show_ticks(False)
 
