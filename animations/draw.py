@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import shutil
 from typing import Match
@@ -6,6 +7,7 @@ from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from matplotlib.text import Annotation, Text
+from matplotlib.animation import FuncAnimation
 
 from dijkstra.grid import Grid2D
 from pathlib import Path
@@ -22,28 +24,11 @@ class DrawBoard:
         self.frames_storage = frames_storage
         self._frame_id = 0
 
-        # Init the drawboard empty
-        # self.show_spines(False)
-        # self.show_ticks(False)
-        self.dpi = 500
+        self.dpi = 300
+        self.save_to_file_disabled = False
 
     def _frame_id_to_string(self):
         return str(self._frame_id).zfill(3)
-
-
-    def save_fig(self, filename):
-        if not self.frames_storage:
-            return
-        self._frame_id += 1
-        name_with_id = f"{ self._frame_id_to_string() }_{ filename }"
-        self.fig.savefig(self.frames_storage.joinpath(name_with_id), dpi=self.dpi)
-
-    def save_animation(self, ani, filename):
-        if not self.frames_storage:
-            return
-        self._frame_id += 1
-        name_with_id = f"{self._frame_id_to_string()}_{filename}"
-        ani.save(self.frames_storage.joinpath(name_with_id), writer="ffmpeg", fps=30, dpi=self.dpi)
 
     def reset_frames_storage(self):
         if not self.frames_storage:
@@ -66,6 +51,23 @@ class DrawBoard:
         self.fig.set_facecolor(color)
         self.ax.set_facecolor(color)
 
+    def save_fig(self, filename):
+        if not self.frames_storage:
+            return
+        if self.save_to_file_disabled:
+            return
+        self._frame_id += 1
+        name_with_id = f"{ self._frame_id_to_string() }_{ filename }"
+        self.fig.savefig(self.frames_storage.joinpath(name_with_id), dpi=self.dpi)
+
+    def save_animation(self, ani, filename):
+        if not self.frames_storage:
+            return
+        if self.save_to_file_disabled:
+            return
+        self._frame_id += 1
+        name_with_id = f"{self._frame_id_to_string()}_{filename}"
+        ani.save(self.frames_storage.joinpath(name_with_id), writer="ffmpeg", fps=30, dpi=self.dpi)
  
 
 class MathBox:
@@ -82,7 +84,7 @@ class MathBox:
         self.y_padding = self.ylim[1]/(self.ylim[1] - 1)
  
         self.text_lines = []
-        self.max_text_lines = 6
+        self.max_text_lines = 12
         
         self.box = self._init_box()
 
@@ -111,6 +113,42 @@ class MathBox:
          
     def set_text(self, text, line):
         self.text_lines[line].set_text(text)
+
+    def set_first_line_as_title(self):
+        self.text_lines[0].set_fontweight("bold")
+        self.text_lines[0].set_fontsize(13)
+
+class EdgeDistancesAnimation:
+    def __init__(self, edge_label, start_pos, target_pos, frames=40) -> None:
+        self.edge_label = edge_label
+        self.pos = start_pos
+        # self.target_pos = np.array([ target_pos[0]+0.5, target_pos[1]-0.1 ])
+        self.target_pos = np.array(target_pos)
+        self.frames = frames
+        self.step = (self.target_pos - self.pos) / self.frames
+        # self.x_step = abs(self.target_x-self.x)/(self.frames)
+        # self.y_step = abs(self.target_y-self.y)/(self.frames)
+        print(f"start_pos: {self.pos}, target: {self.target_pos}, step: {self.step}")
+
+    def update(self, f, edge_label):
+        # print(self.pos, len(self.pos))
+        # print(self.step)
+        self.edge_label.set_position(self.pos)
+        self.pos += self.step
+        return (edge_label,)
+
+
+    def generate_animation(self, fig):
+        ani = FuncAnimation(
+            fig,
+            self.update,
+            frames=self.frames,
+            blit=True,
+            interval=10,
+            fargs=(self.edge_label,),
+        )
+        return ani
+        # db.save_animation(ani, "edge_animation.mp4")
 
 def add_edge_name(ax: Axes, edge: tuple)->Text:
     offset = 0.1
@@ -152,6 +190,9 @@ def add_text_box(text: str, pos: tuple, ax:Axes|None=None, **kwargs):
     ax = ax or plt.gca()
     box = ax.text(pos[0], pos[1], text, **default_kwargs)
     return box
+
+
+
 
 
 if __name__ == "__main__":

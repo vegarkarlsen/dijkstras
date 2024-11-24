@@ -165,13 +165,15 @@ def transition_to_dijkstra_lecture():
     db.save_animation(ani, "grid_zoom.mp4")
     return ani
 
-db.reset_frames_storage()
-make_intro()
-add_map()
-add_start_and_end_pos()
-add_grid()
-add_car_grided()
-add_full_grid()
-ani = transition_to_dijkstra_lecture()
+if __name__ == "__main__":
 
-plt.show()
+    db.reset_frames_storage()
+    make_intro()
+    add_map()
+    add_start_and_end_pos()
+    add_grid()
+    add_car_grided()
+    add_full_grid()
+    ani = transition_to_dijkstra_lecture()
+
+    plt.show()

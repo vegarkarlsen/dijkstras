@@ -52,35 +52,35 @@ def set_default_math_box_text():
     # math_box.set_text("Parents", 3)
 
 
-class EdgeDistancesAnimation:
-    def __init__(self, edge_label, target_pos, frames=40) -> None:
-        self.edge_label = edge_label
-        self.pos = np.array(edge_label.get_position())
-        self.target_pos = np.array([ target_pos[0]+0.5, target_pos[1]-0.1 ])
-        self.frames = frames
-        self.step = (self.target_pos - self.pos) / self.frames
-        # self.x_step = abs(self.target_x-self.x)/(self.frames)
-        # self.y_step = abs(self.target_y-self.y)/(self.frames)
-        print(f"start_pos: {self.pos}, target: {self.target_pos}, step: {self.step}")
-
-    def update(self, f, edge_label):
-        # print(self.pos, len(self.pos))
-        # print(self.step)
-        self.edge_label.set_position(self.pos)
-        self.pos += self.step
-        return (edge_label,)
-
-    def generate_animation(self):
-        ani = FuncAnimation(
-            db.fig,
-            self.update,
-            frames=self.frames,
-            blit=True,
-            interval=10,
-            fargs=(self.edge_label,),
-        )
-        return ani
-        # db.save_animation(ani, "edge_animation.mp4")
+# class EdgeDistancesAnimation:
+#     def __init__(self, edge_label, target_pos, frames=40) -> None:
+#         self.edge_label = edge_label
+#         self.pos = np.array(edge_label.get_position())
+#         self.target_pos = np.array([ target_pos[0]+0.5, target_pos[1]-0.1 ])
+#         self.frames = frames
+#         self.step = (self.target_pos - self.pos) / self.frames
+#         # self.x_step = abs(self.target_x-self.x)/(self.frames)
+#         # self.y_step = abs(self.target_y-self.y)/(self.frames)
+#         print(f"start_pos: {self.pos}, target: {self.target_pos}, step: {self.step}")
+#
+#     def update(self, f, edge_label):
+#         # print(self.pos, len(self.pos))
+#         # print(self.step)
+#         self.edge_label.set_position(self.pos)
+#         self.pos += self.step
+#         return (edge_label,)
+#
+#     def generate_animation(self):
+#         ani = FuncAnimation(
+#             db.fig,
+#             self.update,
+#             frames=self.frames,
+#             blit=True,
+#             interval=10,
+#             fargs=(self.edge_label,),
+#         )
+#         return ani
+#         # db.save_animation(ani, "edge_animation.mp4")
 
 def init_algo_board():
     db.save_fig("start.png")
@@ -193,12 +193,14 @@ def add_neigbour_edges(use_long_start_frame=False):
             zorder=2,
             mutation_scale=10,
         )
-        print(f"arrow from {data.current_edge} to {edge}")
+        # print(f"arrow from {data.current_edge} to {edge}")
         arrow.set_visible(False)
         db.ax.add_patch(arrow)
         arrows.append(arrow)
 
     # frames = 10
+
+    curr_dist = int( algo.distances[data.current_edge] )
 
     n_nodes = len(data.updated_edges)
     for i in range(n_nodes):
@@ -220,12 +222,16 @@ def add_neigbour_edges(use_long_start_frame=False):
         neighbour_scat_data = algo_AM.updated_edges_scat.get_offsets()
         algo_AM.updated_edges_scat.set_offsets(neighbour_scat_data[1:])
 
-        print(neighbour_scat_data, type(neighbour_scat_data))
+        # print(neighbour_scat_data, type(neighbour_scat_data))
 
         labels[i].set_visible(False)
-        node_name = labels[i].get_text()
-        math_box.set_text(f"Distances <-- {node_name} = 0 + 1",1)
-        math_box.set_text(f"Queue <-- {node_name,1}",2)
+        # node_name = labels[i].get_text()
+        neighbour_node_name = data.neighbour_edges[i]
+
+        neighbour_dist = int( algo.distances[neighbour_node_name] )
+
+        math_box.set_text(f"Distances <-- {neighbour_node_name} = {curr_dist} + 1",1)
+        math_box.set_text(f"Queue <-- ({neighbour_node_name}, {neighbour_dist})",2)
         # math_box.set_text(f"Parents[{node_name}]=")
         db.save_fig("post_neighbour_ani.png")
         # if i > 1 and use_long_start_frame:
@@ -306,13 +312,13 @@ algo_AM.update_artists(data)
 
 init_algo_board()
 add_current_node_distance_ani()
-add_all_nodes_distance_ani()
-add_neigbour_edges(True)
+# add_all_nodes_distance_ani()
+# add_neigbour_edges(True)
 
-for i in range(3):
-    data = algo.iter()
-    algo_AM.update_artists(data)
-    add_neigbour_edges()
+# for i in range(3):
+#     data = algo.iter()
+#     algo_AM.update_artists(data)
+#     add_neigbour_edges()
 
 # data = algo.iter()
 # algo_AM.update_artists(data)

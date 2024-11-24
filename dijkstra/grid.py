@@ -48,6 +48,11 @@ class Grid2D:
 
         edges = [
             (
+                column + 1,
+                row + 1,
+            ),  # top right
+            (column + 1, row),  # bottom right
+            (
                 column,
                 row,
             ),  # Bottom left
@@ -55,11 +60,6 @@ class Grid2D:
                 column,
                 row + 1,
             ),  # top left
-            (
-                column + 1,
-                row + 1,
-            ),  # top right
-            (column + 1, row),  # bottom right
         ]
 
         return edges
@@ -200,7 +200,6 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     g = Grid2D.get_test_grid()
 
-    ax.scatter(*edge, zorder=3)
-
-    g.plot_grid(ax)
+    # ax.scatter(*edge, zorder=3)
+    mesh = g.get_grid_mesh(ax)
     plt.show()

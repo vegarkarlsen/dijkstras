@@ -7,6 +7,7 @@ from matplotlib.animation import ArtistAnimation, FuncAnimation
 from matplotlib.collections import PathCollection
 from .colors import colors
 from matplotlib.axes import Axes
+from matplotlib.patches import FancyArrowPatch
 
 class ArtistManager:
 
@@ -87,13 +88,24 @@ class ArtistManager:
     
     def make_graph(self, current_edge: tuple[int,int], updated_edges: list[tuple[int,int]]) -> list[list]:
 
-        lines = []
+        arrows = []
         for e in updated_edges:
-            x = [current_edge[0], e[0]]
-            y = [current_edge[1], e[1]]
-            line, = self.ax.plot(x,y, color="grey", zorder=1, visible=False)
-            lines.append(line)
-        return lines
+            arrow = FancyArrowPatch(
+                        current_edge,
+                        e,
+                        arrowstyle="->",
+                        connectionstyle="arc3",
+                        color="grey",
+                        linewidth=2,
+                        zorder=2,
+                        mutation_scale=10,
+                    )
+            # x = [current_edge[0], e[0]]
+            # y = [current_edge[1], e[1]]
+            # line, = self.ax.plot(x,y, color="grey", zorder=1, visible=False)
+            self.ax.add_patch(arrow)
+            arrows.append(arrow)
+        return arrows
 
 
 
@@ -105,6 +117,7 @@ def animate_update(frame, artist_manager):
     global frame_iterations
     global path_found
 
+    algo.grid.set_up_axis(db.ax)
     # NOTE: Frame does not behave correclty in the start?
     if frame < 3:
         # print(frame)
@@ -121,6 +134,7 @@ def animate_update(frame, artist_manager):
     active_artists.extend(artist_manager.exploration_graph)
 
     if path_found:
+        print(f"Found the path after {frame+3} frames.")
         active_artists.append(artist_manager.final_path)
         return active_artists
 
@@ -144,6 +158,11 @@ def animate_update(frame, artist_manager):
 
     return active_artists
 
+def init_function(f, artist_manager):
+    """Choose wich frame to start from"""
+    for i in range(3,f):
+        animate_update(i, artist_manager)
+
 if __name__ == "__main__":
     # Set up drawBoard
     db = DrawBoard(frames_storage=None)
@@ -152,15 +171,22 @@ if __name__ == "__main__":
 
     # Set up Scenario
     parking_lot_grid_file = np.load("numpy_grids/parking_lot_grid_22_28.npy")
+    # cropped_grid = parking_lot_grid_file[0:20, 0:16]
     g = Grid2D(grid=parking_lot_grid_file)
-    algo = Dijkstras(g, (1, 3), (27, 21))
+    start_point = (1,4)
+    end_point = (16, 21)
+    algo = Dijkstras(g, start_point, end_point)
 
     algo.grid.set_up_axis(db.ax)
     mesh = algo.grid.get_grid_mesh(db.ax)
     artist_manager = ArtistManager(db.fig, db.ax)
+    db.ax.scatter(end_point[0], end_point[1])
     
     frames = algo.grid.xEdgeRange.max() * algo.grid.yEdgeRange.max() * frame_iterations
     print(f"There are {frames} frames.")
-    ani = FuncAnimation(db.fig, animate_update, frames=frames, interval=10, blit=True, fargs=(artist_manager,))
-    # ani.save("animation.mp4", writer="ffmpeg", fps=30, dpi=200)
+    init_function(9, artist_manager)
+    print(db.ax.get_xlim())
+    db.ax.set_xlim(left=0)
+    ani = FuncAnimation(db.fig, animate_update, frames=660, interval=10, blit=True, fargs=(artist_manager,))
+    ani.save(f"frames/dijkstra_animation_{end_point[0]}_{end_point[1]}.mp4", writer="ffmpeg", fps=30, dpi=300)
     plt.show()
