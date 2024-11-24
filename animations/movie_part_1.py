@@ -131,6 +131,16 @@ def add_full_grid():
     full_grid.get_grid_mesh(db.ax)
     db.save_fig("fully_gridded.png")
 
+    start_point = (1,4)
+    end_point = (16, 21)
+
+    db.ax.scatter(start_point[0], start_point[1], color="red", linewidths=2, zorder=2)
+    db.save_fig("Start_point.png")
+
+    db.ax.scatter(*end_point, color="orange", linewidths=2, zorder=2)
+    db.save_fig("end_point.png")
+
+
 def transition_to_dijkstra_lecture():
 
     # Scope hack
@@ -168,11 +178,11 @@ def transition_to_dijkstra_lecture():
 if __name__ == "__main__":
 
     db.reset_frames_storage()
-    make_intro()
-    add_map()
-    add_start_and_end_pos()
-    add_grid()
-    add_car_grided()
+    # make_intro()
+    # add_map()
+    # add_start_and_end_pos()
+    # add_grid()
+    # add_car_grided()
     add_full_grid()
     ani = transition_to_dijkstra_lecture()
 

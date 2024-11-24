@@ -11,7 +11,7 @@ from .dijkstra_animation import ArtistManager
 
 
 PROJECT_ROOT = Path(__file__).parent.parent
-FRAMES_STORAGE = PROJECT_ROOT.joinpath("frames/part_second_iter")
+FRAMES_STORAGE = PROJECT_ROOT.joinpath("frames/corrected_firstpart_of_first_iteration")
 NUMPY_GRID_FILE = PROJECT_ROOT.joinpath("numpy_grids/parking_lot_grid_22_28.npy")
 DEBUG = False
 
@@ -62,12 +62,16 @@ def create_iteration_data():
 
     return labels, arrows
 
+
 def init_math_box_algorithm(save_figs=False):
 
     # init Title
+    # Hack title pos
+    t_pos = math_box.text_lines[0].get_position()
+    math_box.text_lines[0].set_position(( t_pos[0]-0.2, t_pos[1] ))
     math_box.box.set_visible(True)
     math_box.set_first_line_as_title()
-    math_box.set_text("First iteration",0)
+    math_box.set_text("While Queue not empty:",0)
     if save_figs: db.save_fig("init.png")
 
     math_box.set_text("node, distance <-- queue",1)
@@ -91,11 +95,11 @@ def init_math_box_algorithm(save_figs=False):
     math_box.set_text("    queue <-- (neighbour_node, node_distance)", 10)
     if save_figs: db.save_fig("if_statement_enqueue.png")
 
-    math_box.set_text(f"{data.current_edge}, 0 <-- queue",1)
-    if save_figs: db.save_fig("deque.png")
-
-    math_box.set_text(f"visited <-- {data.current_edge}",2)
-    if save_figs: db.save_fig("mark_visited.png")
+    # math_box.set_text(f"{data.current_edge}, 0 <-- queue",1)
+    # if save_figs: db.save_fig("deque.png")
+    #
+    # math_box.set_text(f"visited <-- {data.current_edge}",2)
+    # if save_figs: db.save_fig("mark_visited.png")
 
 def add_current_node_deque_animation():
 
@@ -253,25 +257,29 @@ def add_neigbour_edges(use_long_start_frame=False):
 
 
 db.reset_frames_storage()
-db.save_to_file_disabled = True
+init_math_box_algorithm(True)
 
-data = algo.iter()
-algo_AM.update_artists(data)
-current_node_label = add_current_node_deque_animation()
-add_neigbour_iteration(False)
-current_node_label.set_visible(False)
 
-data = algo.iter()
-algo_AM.update_artists(data)
-db.save_to_file_disabled = False
-algo_AM.updated_edges_scat.set_visible(False)
-algo_AM.active_edge_scat.set_visible(False)
-
-init_math_box_algorithm(False)
-math_box.set_text("Second iteration",0)
-db.save_fig("Init_math_second_iteration.png")
-
-add_current_node_deque_animation()
-add_neigbour_iteration(False)
+# db.reset_frames_storage()
+# db.save_to_file_disabled = True
+#
+# data = algo.iter()
+# algo_AM.update_artists(data)
+# current_node_label = add_current_node_deque_animation()
+# add_neigbour_iteration(False)
+# current_node_label.set_visible(False)
+#
+# data = algo.iter()
+# algo_AM.update_artists(data)
+# db.save_to_file_disabled = False
+# algo_AM.updated_edges_scat.set_visible(False)
+# algo_AM.active_edge_scat.set_visible(False)
+#
+# init_math_box_algorithm(False)
+# math_box.set_text("Second iteration",0)
+# db.save_fig("Init_math_second_iteration.png")
+#
+# add_current_node_deque_animation()
+# add_neigbour_iteration(False)
 
 plt.show()
